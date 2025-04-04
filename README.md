@@ -1,3 +1,1 @@
-# SciMan
-# SciMan
-# SciMan
+# SciMan Project
