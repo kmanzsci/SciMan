@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Image, SafeAreaView, Modal } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import LessonUnit1Screen from './LessonUnit1Screen'; 
 
 // สร้าง Stack Navigator ภายใน
 const LessonsStack = createNativeStackNavigator();
@@ -232,7 +233,10 @@ function LessonsContentScreen({ navigation }) {
           {/* แถวที่ 1 */}
           <View style={styles.lessonRow}>
             {/* หน่วยที่ 1 */}
-            <TouchableOpacity style={styles.lessonGridCard}>
+            <TouchableOpacity 
+              style={styles.lessonGridCard}
+              onPress={() => navigation.navigate('LessonUnit1Screen')}
+            >
               <Image 
                 source={require('./assets/images/LessonsciBG1.png')} 
                 style={styles.lessonCardBackground}
@@ -245,7 +249,10 @@ function LessonsContentScreen({ navigation }) {
                 </View>
                 <View style={styles.lessonGridMeta}>
                   <Text style={styles.lessonGridTime}>6 ชั่วโมง</Text>
-                  <TouchableOpacity style={styles.startButtonSmall}>
+                  <TouchableOpacity 
+                    style={styles.startButtonSmall}
+                    onPress={() => navigation.navigate('LessonUnit1Screen')} // เพิ่ม/แก้ไขส่วนนี้
+                  >
                     <Text style={styles.startButtonText}>เริ่ม</Text>
                   </TouchableOpacity>
                 </View>
@@ -548,6 +555,14 @@ function LessonsScreen({ route, navigation }) {
           headerShown: false
         }} 
       />
+      <LessonsStack.Screen 
+        name="LessonUnit1" 
+        component={LessonUnit1Screen} 
+        options={{ 
+          headerShown: false
+        }} 
+      />
+      
     </LessonsStack.Navigator>
   );
 }
