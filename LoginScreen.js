@@ -45,46 +45,17 @@ function LoginScreen({ navigation }) {
     setIsLoading(true);
   
     try {
-      // ล็อกอินด้วย Firebase
+      console.log("Attempting to login with:", username, password);
       const { user, userData } = await loginWithEmail(username, password);
+      console.log("Login successful:", userData);
       
-      // ตรวจสอบประเภทผู้ใช้
-      if (userData.userType !== userType) {
-        throw new Error('ประเภทผู้ใช้ไม่ตรงกัน');
-      }
-  
-      // ล็อกอินสำเร็จ นำทางไปยังหน้าที่เหมาะสมตามประเภทผู้ใช้
-      if (userData.userType === 'teacher') {
-        // สำหรับครู ไปที่หน้า Dashboard
-        navigation.reset({
-          index: 0,
-          routes: [
-            {
-              name: 'TeacherDashboard',
-              params: {
-                userType: userData.userType,
-                username: userData.fullName,
-              },
-            },
-          ],
-        });
-      } else {
-        // สำหรับนักเรียน ไปที่หน้าบทเรียน
-        navigation.reset({
-          index: 0,
-          routes: [
-            {
-              name: 'Lessons',
-              params: {
-                userType: userData.userType,
-                username: userData.fullName,
-              },
-            },
-          ],
-        });
-      }
+      // ตรวจสอบประเภทผู้ใช้...
     } catch (error) {
-      // โค้ดจัดการข้อผิดพลาด (เหมือนเดิม)
+      console.error('Login error details:', error);
+      Alert.alert(
+        'ข้อผิดพลาดในการเข้าสู่ระบบ', 
+        `รายละเอียด: ${error.message || 'ไม่สามารถเชื่อมต่อกับระบบได้'}`
+      );
     } finally {
       setIsLoading(false);
     }
@@ -287,10 +258,15 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 10,
     padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
+    ...(Platform.OS === 'web' 
+      ? { boxShadow: '0 2px 3px rgba(0, 0, 0, 0.1)' }
+      : {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 3,
+        }
+    ),
     elevation: 3,
   },
   loginTitle: {

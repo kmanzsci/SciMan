@@ -8,6 +8,7 @@ import {
   Image,
   SafeAreaView,
   Modal,
+  Platform,
   Alert  // เพิ่ม Alert ถ้ายังไม่มี
 } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -812,35 +813,51 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 8,
   },
+  
   lessonGridTitle: {
     fontSize: 22,
     fontWeight: 'bold',
     color: 'white',
     marginBottom: 4,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  lessonGridSubtitle: {
-    fontSize: 14,
-    color: 'white',
-    marginBottom: 8,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    ...(Platform.OS === 'web'
+      ? { textShadow: '1px 1px 2px rgba(0, 0, 0, 0.75)' }
+      : {
+          textShadowColor: 'rgba(0, 0, 0, 0.75)',
+          textShadowOffset: { width: 1, height: 1 },
+          textShadowRadius: 2,
+        }
+    ),
   },
   lessonGridMeta: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  lessonGridSubtitle: {
+    fontSize: 14,
+    color: 'white',
+    marginBottom: 8,
+    ...(Platform.OS === 'web'
+      ? { textShadow: '1px 1px 2px rgba(0, 0, 0, 0.75)' }
+      : {
+          textShadowColor: 'rgba(0, 0, 0, 0.75)',
+          textShadowOffset: { width: 1, height: 1 },
+          textShadowRadius: 2,
+        }
+    ),
+  },
   lessonGridTime: {
     fontSize: 12,
     color: 'white',
     fontWeight: '500',
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    ...(Platform.OS === 'web'
+      ? { textShadow: '1px 1px 2px rgba(0, 0, 0, 0.75)' }
+      : {
+          textShadowColor: 'rgba(0, 0, 0, 0.75)',
+          textShadowOffset: { width: 1, height: 1 },
+          textShadowRadius: 2,
+        }
+    ),
   },
   startButtonSmall: {
     backgroundColor: '#4CAF50',
