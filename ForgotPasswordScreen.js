@@ -11,33 +11,39 @@ import {
   SafeAreaView,
   Alert
 } from 'react-native';
+import { resetPassword } from './src/firebase/auth';
 
 function ForgotPasswordScreen({ navigation }) {
-  const [userType, setUserType] = useState('student'); // 'student' หรือ 'teacher'
-  const [identifier, setIdentifier] = useState(''); // รหัสนักเรียนหรือ username
   const [email, setEmail] = useState('');
   const [isEmailSent, setIsEmailSent] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
-  const handleResetPassword = () => {
+  const handleResetPassword = async () => {
     // ตรวจสอบข้อมูลก่อนดำเนินการต่อ
-    if (identifier.trim() === '') {
-      Alert.alert('ข้อผิดพลาด', userType === 'student' ? 'กรุณากรอกรหัสประจำตัวนักเรียน' : 'กรุณากรอกชื่อผู้ใช้');
-      return;
-    }
     if (email.trim() === '') {
       Alert.alert('ข้อผิดพลาด', 'กรุณากรอกอีเมล');
       return;
     }
     
-    // แสดงว่าได้ส่งอีเมลรีเซ็ทรหัสผ่านแล้ว (จำลอง)
-    console.log('ข้อมูลการรีเซ็ทรหัสผ่าน:', { 
-      userType, 
-      identifier, 
-      email 
-    });
+    setIsLoading(true);
     
-    // จำลองการส่งอีเมล
-    setIsEmailSent(true);
+    try {
+      // ส่งอีเมลรีเซ็ตรหัสผ่านด้วย Firebase
+      await resetPassword(email);
+      setIsEmailSent(true);
+    } catch (error) {
+      console.error('Reset password error:', error);
+      
+      if (error.code === 'auth/user-not-found') {
+        Alert.alert('ข้อผิดพลาด', 'ไม่พบอีเมลนี้ในระบบ');
+      } else if (error.code === 'auth/invalid-email') {
+        Alert.alert('ข้อผิดพลาด', 'รูปแบบอีเมลไม่ถูกต้อง');
+      } else {
+        Alert.alert('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการส่งอีเมล โปรดลองอีกครั้ง');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGoBack = () => {

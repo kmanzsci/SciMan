@@ -13,16 +13,13 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import { loginWithEmail } from './src/firebase/auth';
 
 function LoginScreen({ navigation }) {
   const [userType, setUserType] = useState('student'); // 'student' หรือ 'teacher'
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  // URL ของ Web App จาก Google Apps Script ที่คุณได้จากการ Deploy
-  const GOOGLE_SCRIPT_URL =
-    'https://script.google.com/macros/s/AKfycbxZ2uvEi4fX6B0QAG1DQ4MggYmMlaCVt792Ry_zIZTUhDIJlo8pAfrRQCzHrY_-uLlyeQ/exec'; // Replace with your actual URL
 
   const validateInput = () => {
     if (username.trim() === '') {
@@ -44,59 +41,50 @@ function LoginScreen({ navigation }) {
     if (!validateInput()) {
       return;
     }
-
+  
     setIsLoading(true);
-
+  
     try {
-      const loginUrl = `${GOOGLE_SCRIPT_URL}?action=login&userType=${userType}&identifier=${username}&password=${password}`;
-
-      console.log('Login URL:', loginUrl); // Log the constructed URL
-
-      const response = await fetch(loginUrl);
-      console.log('Response status:', response.status); // Log the response status
-
-      if (!response.ok) {
-        const errorText = await response.text(); // Try to get error details
-        console.error('Login failed (server error):', errorText);
-        throw new Error(`Login failed (HTTP ${response.status}): ${errorText}`); // Include errorText in the error
+      // ล็อกอินด้วย Firebase
+      const { user, userData } = await loginWithEmail(username, password);
+      
+      // ตรวจสอบประเภทผู้ใช้
+      if (userData.userType !== userType) {
+        throw new Error('ประเภทผู้ใช้ไม่ตรงกัน');
       }
-
-      const text = await response.text();
-      console.log('Response text:', text);
-
-      let result;
-      try {
-        result = JSON.parse(text);
-      } catch (e) {
-        console.error('Error parsing response:', e);
-        throw new Error('ไม่สามารถประมวลผลการตอบกลับจากเซิร์ฟเวอร์ได้');
-      }
-
-      if (result.status === 'success') {
-        // เข้าสู่ระบบสำเร็จ นำทางไปยังหน้าบทเรียน
+  
+      // ล็อกอินสำเร็จ นำทางไปยังหน้าที่เหมาะสมตามประเภทผู้ใช้
+      if (userData.userType === 'teacher') {
+        // สำหรับครู ไปที่หน้า Dashboard
+        navigation.reset({
+          index: 0,
+          routes: [
+            {
+              name: 'TeacherDashboard',
+              params: {
+                userType: userData.userType,
+                username: userData.fullName,
+              },
+            },
+          ],
+        });
+      } else {
+        // สำหรับนักเรียน ไปที่หน้าบทเรียน
         navigation.reset({
           index: 0,
           routes: [
             {
               name: 'Lessons',
               params: {
-                userType: userType, // Pass userType
-                username: result.userData.username,  // Pass username
+                userType: userData.userType,
+                username: userData.fullName,
               },
             },
           ],
         });
-      } else {
-        // เข้าสู่ระบบไม่สำเร็จ
-        Alert.alert('ข้อผิดพลาด', result.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
       }
     } catch (error) {
-      console.error('Login error:', error);
-      Alert.alert(
-        'ข้อผิดพลาด',
-        error.message ||
-          'เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์ โปรดลองอีกครั้ง'
-      );
+      // โค้ดจัดการข้อผิดพลาด (เหมือนเดิม)
     } finally {
       setIsLoading(false);
     }

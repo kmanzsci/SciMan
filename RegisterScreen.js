@@ -12,6 +12,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import { registerWithEmail } from './src/firebase/auth';
 
 function RegisterScreen({ navigation, route }) {
   // รับค่าจาก route params (ถ้ามี)
@@ -38,10 +39,6 @@ function RegisterScreen({ navigation, route }) {
       );
     }
   }, [fromGuest]);
-
-  // URL ของ Web App จาก Google Apps Script ที่คุณได้จากการ Deploy
-  const GOOGLE_SCRIPT_URL =
-    'https://script.google.com/macros/s/AKfycbxZ2uvEi4fX6B0QAG1DQ4MggYmMlaCVt792Ry_zIZTUhDIJlo8pAfrRQCzHrY_-uLlyeQ/exec'; // Replace with your actual URL
 
   const validateInput = () => {
     if (fullName.trim() === '') {
@@ -86,68 +83,51 @@ function RegisterScreen({ navigation, route }) {
 
   const handleRegister = async () => {
     setErrorMessage(''); // Reset error message
-
+  
     if (!validateInput()) {
       return;
     }
-
+  
     setIsLoading(true);
-
-    const formData = {
-      action: 'register', // Add the action for registration
-      userType,
-      fullName,
-      email,
-      studentId: userType === 'student' ? studentId : '',
-      username: userType === 'teacher' ? username : '',
-      password,
-    };
-
+  
     try {
-      console.log('Sending data to:', GOOGLE_SCRIPT_URL);
-      console.log('Data being sent:', JSON.stringify(formData));
-
-      const response = await fetch(GOOGLE_SCRIPT_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8', // Set Content-Type
-        },
-        body: JSON.stringify(formData),
-      });
-
-      console.log('Response status:', response.status);
-      const text = await response.text();
-      console.log('Response text:', text);
-
-      let result;
-      try {
-        result = JSON.parse(text);
-      } catch (e) {
-        console.error('Error parsing response:', e);
-        throw new Error('ไม่สามารถประมวลผลการตอบกลับจากเซิร์ฟเวอร์ได้');
-      }
-
-      if (result.status === 'success') {
-        Alert.alert(
-          'ลงทะเบียนสำเร็จ',
-          'คุณได้ลงทะเบียนเรียบร้อยแล้ว จะนำไปสู่หน้าเข้าสู่ระบบ',
-          [
-            {
-              text: 'ตกลง',
-              onPress: () => {
-                navigation.navigate('Login'); // Navigate to Login
-              },
+      // สร้างข้อมูลผู้ใช้
+      const userData = {
+        userType,
+        fullName,
+        email,
+        studentId: userType === 'student' ? studentId : '',
+        username: userType === 'teacher' ? username : '',
+      };
+  
+      // ลงทะเบียนผู้ใช้ด้วย Firebase
+      await registerWithEmail(email, password, userData);
+  
+      Alert.alert(
+        'ลงทะเบียนสำเร็จ',
+        'คุณได้ลงทะเบียนเรียบร้อยแล้ว จะนำไปสู่หน้าเข้าสู่ระบบ',
+        [
+          {
+            text: 'ตกลง',
+            onPress: () => {
+              navigation.navigate('Login');
             },
-          ]
-        );
-      } else {
-        setErrorMessage(result.message || 'ไม่สามารถลงทะเบียนได้ โปรดลองอีกครั้ง');
-      }
+          },
+        ]
+      );
     } catch (error) {
       console.error('Registration error:', error);
-      setErrorMessage(
-        error.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์ โปรดลองอีกครั้ง'
-      );
+      
+      // แสดงข้อความข้อผิดพลาดที่เฉพาะเจาะจง
+      if (error.code === 'auth/email-already-in-use') {
+        setErrorMessage('อีเมลนี้ถูกใช้งานแล้ว กรุณาใช้อีเมลอื่น');
+      } else if (error.code === 'auth/invalid-email') {
+        setErrorMessage('รูปแบบอีเมลไม่ถูกต้อง');
+      } else if (error.code === 'auth/weak-password') {
+        setErrorMessage('รหัสผ่านไม่ปลอดภัยเพียงพอ');
+      } else {
+        setErrorMessage('เกิดข้อผิดพลาดในการลงทะเบียน โปรดลองอีกครั้ง');
+      }
     } finally {
       setIsLoading(false);
     }

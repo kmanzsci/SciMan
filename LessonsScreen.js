@@ -1,7 +1,18 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Image, SafeAreaView, Modal } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+  SafeAreaView,
+  Modal,
+  Alert  // เพิ่ม Alert ถ้ายังไม่มี
+} from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LessonUnit1Screen from './LessonUnit1Screen'; 
+import { logout } from './src/firebase/auth';  // เพิ่ม import นี้
 
 // สร้าง Stack Navigator ภายใน
 const LessonsStack = createNativeStackNavigator();
@@ -11,6 +22,20 @@ function LessonsHomeScreen({ route, navigation }) {
   const { userType, username } = route.params || {};
   const isGuestUser = username && (username.includes('ทดลองใช้งาน'));
   const [showRecentActivities, setShowRecentActivities] = useState(false);
+
+
+  const handleLogout = async () => {
+    try {
+      await logout(); // เรียกใช้ฟังก์ชัน logout จาก Firebase
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home' }],
+      });
+    } catch (error) {
+      console.error('Logout failed:', error);
+      Alert.alert('ข้อผิดพลาด', 'ไม่สามารถออกจากระบบได้ โปรดลองอีกครั้ง');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -207,12 +232,7 @@ function LessonsHomeScreen({ route, navigation }) {
       {/* ปุ่มออกจากระบบ */}
       <TouchableOpacity 
         style={styles.logoutButton}
-        onPress={() => {
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'Home' }],
-          });
-        }}
+        onPress={handleLogout}
       >
         <Text style={styles.logoutButtonText}>ออกจากระบบ</Text>
       </TouchableOpacity>
@@ -220,7 +240,6 @@ function LessonsHomeScreen({ route, navigation }) {
   );
 }
 
-// หน้าบทเรียนวิทยาศาสตร์
 // หน้าบทเรียนวิทยาศาสตร์
 function LessonsContentScreen({ navigation }) {
   return (
@@ -235,7 +254,7 @@ function LessonsContentScreen({ navigation }) {
             {/* หน่วยที่ 1 */}
             <TouchableOpacity 
               style={styles.lessonGridCard}
-              onPress={() => navigation.navigate('LessonUnit1Screen')}
+              onPress={() => navigation.navigate('LessonUnit1')}
             >
               <Image 
                 source={require('./assets/images/LessonsciBG1.png')} 
@@ -251,7 +270,7 @@ function LessonsContentScreen({ navigation }) {
                   <Text style={styles.lessonGridTime}>6 ชั่วโมง</Text>
                   <TouchableOpacity 
                     style={styles.startButtonSmall}
-                    onPress={() => navigation.navigate('LessonUnit1Screen')} // เพิ่ม/แก้ไขส่วนนี้
+                    onPress={() => navigation.navigate('LessonUnit1')} // เพิ่ม/แก้ไขส่วนนี้
                   >
                     <Text style={styles.startButtonText}>เริ่ม</Text>
                   </TouchableOpacity>
@@ -534,6 +553,13 @@ function LessonsScreen({ route, navigation }) {
         }} 
       />
       <LessonsStack.Screen 
+        name="LessonUnit1" 
+        component={LessonUnit1Screen} 
+        options={{ 
+          headerShown: false
+        }} 
+      />
+      <LessonsStack.Screen 
         name="Worksheets" 
         component={WorksheetsScreen} 
         options={{ 
@@ -547,7 +573,6 @@ function LessonsScreen({ route, navigation }) {
           headerShown: false
         }} 
       />
-
       <LessonsStack.Screen 
         name="Quest" 
         component={QuestScreen} 
@@ -555,13 +580,7 @@ function LessonsScreen({ route, navigation }) {
           headerShown: false
         }} 
       />
-      <LessonsStack.Screen 
-        name="LessonUnit1" 
-        component={LessonUnit1Screen} 
-        options={{ 
-          headerShown: false
-        }} 
-      />
+      
       
     </LessonsStack.Navigator>
   );

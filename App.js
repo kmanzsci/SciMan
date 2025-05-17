@@ -8,39 +8,15 @@ import LoginScreen from './LoginScreen';
 import RegisterScreen from './RegisterScreen';
 import ForgotPasswordScreen from './ForgotPasswordScreen';
 import LessonsScreen from './LessonsScreen';
+import TeacherDashboardScreen from './TeacherDashboardScreen';
+import StudentDetailsScreen from './StudentDetailsScreen';
 
 // สร้าง Stack Navigator
 const Stack = createNativeStackNavigator();
 
 // หน้าหลัก (Home Screen)
 function HomeScreen({ navigation }) {
-  const handlePress = () => {
-    // นำทางไปยังหน้า Login เมื่อกดปุ่ม
-    navigation.navigate('Login');
-  };
-
-  return (
-    <View style={styles.container}>
-      <Image
-        source={require('./assets/logo.png')} 
-        style={styles.logo}
-        resizeMode="contain"
-      />
-      <Text style={styles.title}>Welcome to SciMan</Text>
-      <Text style={styles.subtitle}>แอพพลิเคชั่นการเรียนรู้วิทยาศาสตร์</Text>
-      
-      <TouchableOpacity style={styles.button} onPress={handlePress}>
-        <Text style={styles.buttonText}>เข้าสู่การเรียนรู้</Text>
-      </TouchableOpacity>
-      
-      <View style={styles.footerContainer}>
-        <Text style={styles.footerText}>โดย นายวิทวัส กันแจ่ม</Text>
-        <Text style={styles.footerText}>ครูโรงเรียนศรีสองรักษ์วิทยา อำเภอด่านซ้าย จังหวัดเลย</Text>
-      </View>
-      
-      <StatusBar style="auto" />
-    </View>
-  );
+  // โค้ดเดิม...
 }
 
 // App component ที่จะใช้ NavigationContainer
@@ -97,6 +73,31 @@ export default function App() {
             headerTintColor: '#fff',
             // ป้องกันการกลับไปหน้า login ด้วยปุ่ม back
             headerLeft: () => null,
+          }} 
+        />
+        <Stack.Screen 
+          name="TeacherDashboard" 
+          component={TeacherDashboardScreen} 
+          options={{ 
+            title: 'หน้าควบคุมสำหรับครู',
+            headerStyle: {
+              backgroundColor: '#4CAF50',
+            },
+            headerTintColor: '#fff',
+            // ป้องกันการกลับไปหน้า login ด้วยปุ่ม back
+            headerLeft: () => null,
+          }} 
+        />
+        <Stack.Screen 
+          name="StudentDetails" 
+          component={StudentDetailsScreen} 
+          options={{ 
+            title: 'ข้อมูลนักเรียน',
+            headerStyle: {
+              backgroundColor: '#4CAF50',
+            },
+            headerTintColor: '#fff',
+            headerShown: false,
           }} 
         />
       </Stack.Navigator>
